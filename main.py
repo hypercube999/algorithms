@@ -23,24 +23,18 @@ def _add_hamming_bits(input_array):
     hamming_bit_power = 0
     hamming_bit_pos = 2 ** hamming_bit_power - 1
     while hamming_bit_pos < len(output_array):
-        output_array[hamming_bit_pos] = _calc_hamming_bit_for(output_array, hamming_bit_power)
+        output_array[hamming_bit_pos] = _calc_hamming_bit_for(output_array, hamming_bit_pos+1)
         hamming_bit_power += 1
         hamming_bit_pos = 2 ** hamming_bit_power - 1
     return output_array
 
 
-def _calc_hamming_bit_for(input_array, hamming_bit_power):
-    output_bit = 0
-    step = 2 ** hamming_bit_power
-    i = 2 ** hamming_bit_power - 1
-    while i < len(input_array):
-        j = 0
-        while i + j < min(len(input_array), i + step):
-            output_bit += input_array[i + j]
-            j += 1
-        i += 2 * step
-    output_bit = output_bit % 2
-    return output_bit
+def _calc_hamming_bit_for(input_array, hamming_bit_num):
+    bit_count = 0
+    for i in range(hamming_bit_num - 1, len(input_array), 2 * hamming_bit_num):
+        for j in range(min(len(input_array)-i, hamming_bit_num)):
+            bit_count += input_array[i + j]
+    return bit_count % 2
 
 
 if __name__ == '__main__':

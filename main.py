@@ -2,37 +2,28 @@ import random
 
 
 def apply_hamming_control_bits(input_array):
-    output_array = _insert_positions_for_hamming_bits(input_array)
-    output_array = _add_hamming_bits(output_array)
-    return output_array
-
-
-def _insert_positions_for_hamming_bits(input_array):
     output_array = input_array.copy()
-    hamming_bit_power = 0
-    hamming_bit_pos = 2 ** hamming_bit_power - 1
-    while hamming_bit_pos < len(output_array):
-        output_array.insert(hamming_bit_pos, 0)
-        hamming_bit_power += 1
-        hamming_bit_pos = 2 ** hamming_bit_power - 1
+    for hamming_bit_number in _iter_hamming_bits_numbers(len(output_array)):
+        output_array.insert(hamming_bit_number - 1, 0)
+    for hamming_bit_number in _iter_hamming_bits_numbers(len(output_array)):
+        output_array[hamming_bit_number-1] = _calc_hamming_bit_for(output_array, hamming_bit_number)
     return output_array
 
 
-def _add_hamming_bits(input_array):
-    output_array = input_array.copy()
+def _iter_hamming_bits_numbers(array_len):
     hamming_bit_power = 0
-    hamming_bit_pos = 2 ** hamming_bit_power - 1
-    while hamming_bit_pos < len(output_array):
-        output_array[hamming_bit_pos] = _calc_hamming_bit_for(output_array, hamming_bit_pos+1)
+    hamming_bit_pos = 2 ** hamming_bit_power
+    while hamming_bit_pos < array_len:
+        yield hamming_bit_pos
+        array_len += 1
         hamming_bit_power += 1
-        hamming_bit_pos = 2 ** hamming_bit_power - 1
-    return output_array
+        hamming_bit_pos = 2 ** hamming_bit_power
 
 
-def _calc_hamming_bit_for(input_array, hamming_bit_num):
+def _calc_hamming_bit_for(input_array, hamming_bit_number):
     bit_count = 0
-    for i in range(hamming_bit_num - 1, len(input_array), 2 * hamming_bit_num):
-        for j in range(min(len(input_array)-i, hamming_bit_num)):
+    for i in range(hamming_bit_number - 1, len(input_array), 2 * hamming_bit_number):
+        for j in range(min(len(input_array)-i, hamming_bit_number)):
             bit_count += input_array[i + j]
     return bit_count % 2
 

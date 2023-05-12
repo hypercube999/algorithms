@@ -5,8 +5,14 @@ def code_hamming(input_array):
     output_array = input_array.copy()
     for bit_pos in _iter_hamming_bits_positions(len(output_array), increase_array_len=True):
         output_array.insert(bit_pos, 0)
-    for bit_pos in _iter_hamming_bits_positions(len(output_array), increase_array_len=True):
-        output_array[bit_pos] = _calc_hamming_bit_for(output_array, bit_pos+1)
+    output_array = _calc_hamming_bits(output_array)
+    return output_array
+
+
+def _calc_hamming_bits(input_array):
+    output_array = input_array.copy()
+    for bit_pos in _iter_hamming_bits_positions(len(output_array)):
+        output_array[bit_pos] = _calc_hamming_bit_for_number(output_array, bit_pos + 1)
     return output_array
 
 
@@ -21,7 +27,7 @@ def _iter_hamming_bits_positions(array_len, increase_array_len=False):
         hamming_bit_pos = 2 ** hamming_bit_power
 
 
-def _calc_hamming_bit_for(input_array, hamming_bit_number):
+def _calc_hamming_bit_for_number(input_array, hamming_bit_number):
     bit_count = 0
     for i in range(hamming_bit_number - 1, len(input_array), 2 * hamming_bit_number):
         for j in range(min(len(input_array)-i, hamming_bit_number)):
@@ -31,13 +37,9 @@ def _calc_hamming_bit_for(input_array, hamming_bit_number):
 
 def decode_hamming(input_array):
     temp_array = input_array.copy()
-
     for bit_pos in _iter_hamming_bits_positions(len(input_array)):
         temp_array[bit_pos] = 0
-
-    for bit_pos in _iter_hamming_bits_positions(len(temp_array)):
-        temp_array[bit_pos] = _calc_hamming_bit_for(temp_array, bit_pos+1)
-
+    temp_array = _calc_hamming_bits(temp_array)
     diff_bit_position = _calc_dif_positions(input_array, temp_array)
     output_array = _fix_bits(diff_bit_position, input_array)
     output_array = _remove_hamming_bits(output_array)
@@ -53,24 +55,17 @@ def _fix_bits(diff_bit_position, input_array):
 
 
 def _calc_dif_positions(input_array, temp_array):
-    diff_bit_position = []
-    i = 0
-    while 2 ** i < len(temp_array):
-        if input_array[2 ** i - 1] != temp_array[2 ** i - 1]:
-            diff_bit_position.append(2 ** i)
-        i += 1
-    return diff_bit_position
+    diff_bit_numbers = []
+    for bit_pos in _iter_hamming_bits_positions(len(input_array)):
+        if input_array[bit_pos] != temp_array[bit_pos]:
+            diff_bit_numbers.append(bit_pos+1)
+    return diff_bit_numbers
 
 
 def _remove_hamming_bits(input_array):
     output_array = input_array.copy()
-    i = 0
-    bits_positions = []
-    while 2 ** i < len(output_array):
-        bits_positions.insert(0, 2 ** i - 1)
-        i += 1
-    for bits_pos in bits_positions:
-        del output_array[bits_pos]
+    for bit_pos in reversed(list(_iter_hamming_bits_positions(len(input_array)))):
+        del output_array[bit_pos]
     return output_array
 
 

@@ -3,16 +3,15 @@ import random
 
 def code_hamming(input_array):
     output_array = input_array.copy()
-    for bit_pos in _iter_hamming_bits_positions(len(output_array), increase_array_len=True):
+    for bit_pos in _iter_hamming_bits_positions(len(input_array), increase_array_len=True):
         output_array.insert(bit_pos, 0)
-    output_array = _calc_hamming_bits(output_array)
-    return output_array
-
-
-def _calc_hamming_bits(input_array):
-    output_array = input_array.copy()
-    for bit_pos in _iter_hamming_bits_positions(len(output_array)):
-        output_array[bit_pos] = _calc_hamming_bit_for_number(output_array, bit_pos + 1)
+    output_array_len = len(output_array)
+    for hamming_bit_pos in _iter_hamming_bits_positions(output_array_len):
+        bit_sum = 0
+        for i in range(hamming_bit_pos, output_array_len, 2 * hamming_bit_pos + 2):
+            for j in range(min(output_array_len - i, hamming_bit_pos)):
+                bit_sum = (bit_sum + output_array[i + j]) % 2
+        output_array[hamming_bit_pos] = bit_sum
     return output_array
 
 
@@ -27,21 +26,11 @@ def _iter_hamming_bits_positions(array_len, increase_array_len=False):
         hamming_bit_pos = 2 ** hamming_bit_power
 
 
-def _calc_hamming_bit_for_number(input_array, hamming_bit_number):
-    bit_count = 0
-    for i in range(hamming_bit_number - 1, len(input_array), 2 * hamming_bit_number):
-        for j in range(min(len(input_array)-i, hamming_bit_number)):
-            bit_count += input_array[i + j]
-    return bit_count % 2
-
-
 def decode_hamming(input_array):
-    temp_array = input_array.copy()
-    for bit_pos in _iter_hamming_bits_positions(len(input_array)):
-        temp_array[bit_pos] = 0
-    temp_array = _calc_hamming_bits(temp_array)
-    diff_bit_position = _calc_dif_positions(input_array, temp_array)
-    output_array = _fix_bits(diff_bit_position, input_array)
+    temp_array = _remove_hamming_bits(input_array)
+    temp_array = code_hamming(temp_array)
+    syndrome_bits_positions = _calc_syndrome(input_array, temp_array)
+    output_array = _fix_bits(syndrome_bits_positions, input_array)
     output_array = _remove_hamming_bits(output_array)
     return output_array
 
@@ -54,7 +43,7 @@ def _fix_bits(diff_bit_position, input_array):
     return output_array
 
 
-def _calc_dif_positions(input_array, temp_array):
+def _calc_syndrome(input_array, temp_array):
     diff_bit_numbers = []
     for bit_pos in _iter_hamming_bits_positions(len(input_array)):
         if input_array[bit_pos] != temp_array[bit_pos]:
@@ -64,7 +53,8 @@ def _calc_dif_positions(input_array, temp_array):
 
 def _remove_hamming_bits(input_array):
     output_array = input_array.copy()
-    for bit_pos in reversed(list(_iter_hamming_bits_positions(len(input_array)))):
+    hamming_bits_positions = list(_iter_hamming_bits_positions(len(input_array)))
+    for bit_pos in reversed(hamming_bits_positions):
         del output_array[bit_pos]
     return output_array
 

@@ -9,7 +9,7 @@ def code_hamming(input_array):
     for hamming_bit_pos in _iter_hamming_bits_positions(output_array_len):
         bit_sum = 0
         for i in range(hamming_bit_pos, output_array_len, 2 * hamming_bit_pos + 2):
-            for j in range(min(output_array_len - i, hamming_bit_pos)):
+            for j in range(min(output_array_len - i, hamming_bit_pos + 1)):
                 bit_sum = (bit_sum + output_array[i + j]) % 2
         output_array[hamming_bit_pos] = bit_sum
     return output_array
